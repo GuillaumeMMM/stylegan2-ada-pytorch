@@ -38,6 +38,7 @@ def num_range(s: str) -> List[int]:
 @click.pass_context
 @click.option('--network', 'network_pkl', help='Network pickle filename', required=True)
 @click.option('--seeds', type=num_range, help='List of random seeds')
+@click.option('--position', help='Position')
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
 @click.option('--class', 'class_idx', type=int, help='Class label (unconditional if not specified)')
 @click.option('--noise-mode', help='Noise mode', type=click.Choice(['const', 'random', 'none']), default='const', show_default=True)
@@ -47,6 +48,7 @@ def generate_images(
     ctx: click.Context,
     network_pkl: str,
     seeds: Optional[List[int]],
+    position: Optional[float],
     truncation_psi: float,
     noise_mode: str,
     outdir: str,
@@ -99,8 +101,8 @@ def generate_images(
             img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.png')
         return
 
-    if seeds is None:
-        ctx.fail('--seeds option is required when not using --projected-w')
+    """ if seeds is None:
+        ctx.fail('--seeds option is required when not using --projected-w') """
 
     # Labels.
     label = torch.zeros([1, G.c_dim], device=device)
@@ -113,14 +115,19 @@ def generate_images(
             print ('warn: --class=lbl ignored when running on an unconditional network')
 
     # Generate images.
-    for seed_idx, seed in enumerate(seeds):
-        print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
-        z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
-        img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-        print ('input dims', np.random.RandomState(seed).randn(1, G.z_dim).size, np.random.RandomState(seed).randn(1, G.z_dim)[0].size)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
+    #for seed_idx, seed in enumerate(seeds):
+    #    print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
+    #    z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
+    #    img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
+    #    print ('input dims', np.random.RandomState(seed).randn(1, G.z_dim).size, np.random.RandomState(seed).randn(1, G.z_dim)[0].size)
+    #    img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+    #    PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
 
+    print('Generating image for seed custom')
+    z = torch.from_numpy([position]).to(device)
+    img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
+    img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+    PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom.png')
 
 #----------------------------------------------------------------------------
 
