@@ -48,7 +48,7 @@ def generate_images(
     ctx: click.Context,
     network_pkl: str,
     seeds: Optional[List[int]],
-    position: Optional[float],
+    position,
     truncation_psi: float,
     noise_mode: str,
     outdir: str,
