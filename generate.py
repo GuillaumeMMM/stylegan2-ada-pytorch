@@ -125,13 +125,17 @@ def generate_images(
 
     print('Generating image for seed custom')
     z = torch.from_numpy(np.array([position])).to(device)
+    print('z', z)
+    print('truncation_psi', truncation_psi)
+    print('noise_mode', noise_mode)
     img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-    """ img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+    print('img', img)
+    img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
     PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom.png')
 
 #----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    generate_images() # pylint: disable=no-value-for-parameter """
+    generate_images() # pylint: disable=no-value-for-parameter
 
 #----------------------------------------------------------------------------
