@@ -34,7 +34,7 @@ def num_range(s: str) -> List[int]:
 
 def num_range2(s: str) -> List[float]:
     vals = s.split(',')
-    print('split', vals)
+    print('split', s, vals)
     return [float(x) for x in vals]
 
 #----------------------------------------------------------------------------
