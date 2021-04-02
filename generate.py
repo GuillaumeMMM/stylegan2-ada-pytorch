@@ -38,7 +38,7 @@ def num_range(s: str) -> List[int]:
 @click.pass_context
 @click.option('--network', 'network_pkl', help='Network pickle filename', required=True)
 @click.option('--seeds', type=num_range, help='List of random seeds')
-@click.option('--position', help='Position')
+@click.option('--position', type=num_range, help='Position')
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
 @click.option('--class', 'class_idx', type=int, help='Class label (unconditional if not specified)')
 @click.option('--noise-mode', help='Noise mode', type=click.Choice(['const', 'random', 'none']), default='const', show_default=True)
@@ -48,7 +48,7 @@ def generate_images(
     ctx: click.Context,
     network_pkl: str,
     seeds: Optional[List[int]],
-    position: Optional[np.ndarray],
+    position: Optional[List[int]],,
     truncation_psi: float,
     noise_mode: str,
     outdir: str,
