@@ -19,6 +19,7 @@ import PIL.Image
 import torch
 
 import legacy
+from numpy.random import randn
 
 #----------------------------------------------------------------------------
 
