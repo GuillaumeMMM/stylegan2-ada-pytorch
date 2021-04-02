@@ -124,6 +124,9 @@ def generate_images(
     #    PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
 
     print('Generating image for seed custom')
+    print('print', np.array([position], type(np.array([position]))))
+    print('print2', position, type(position))
+    print('print3', torch.from_numpy(np.array([position])), type(torch.from_numpy(np.array([position]))))
     z = torch.from_numpy(np.array([position])).to(device)
     print('z', z)
     print('truncation_psi', truncation_psi)
