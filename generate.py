@@ -55,6 +55,8 @@ def generate_images(
     class_idx: Optional[int],
     projected_w: Optional[str]
 ):
+
+    print('types', type(position), type(network), type(outdir), type(trunc))
     """Generate images using pretrained network pickle.
 
     Examples:
