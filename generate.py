@@ -55,7 +55,7 @@ def generate_images(
     projected_w: Optional[str]
 ):
     for x in range(10):
-        position = np.array([randn(512)])
+        position = np.array([np.random.uniform(low=-10, high=10, size=(512))])
         """Generate images using pretrained network pickle.
 
         Examples:
