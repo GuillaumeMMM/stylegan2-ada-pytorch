@@ -15,6 +15,7 @@ from typing import List, Optional
 import click
 import dnnlib
 import numpy as np
+from numpy.random import randn
 import PIL.Image
 import torch
 
@@ -53,6 +54,9 @@ def generate_images(
     class_idx: Optional[int],
     projected_w: Optional[str]
 ):
+
+    for x in range(10):
+            position = np.array([np.random.uniform(low=-100, high=100, size=(512))])
     """Generate images using pretrained network pickle.
     Examples:
     \b
@@ -111,10 +115,10 @@ def generate_images(
     # Generate images.
     for seed_idx, seed in enumerate(seeds):
         print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
-        z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
+        z = torch.from_numpy(position).to(device)
         img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom{position[0][0]}.png')
 
 
 #----------------------------------------------------------------------------
