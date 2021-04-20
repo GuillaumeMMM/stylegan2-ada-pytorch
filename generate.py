@@ -54,69 +54,69 @@ def generate_images(
     projected_w: Optional[str]
 ):
 
-for x in range(10):
+    for x in range(10):
         position = np.array([np.random.uniform(low=-range, high=range, size=(512))])
-    """Generate images using pretrained network pickle.
-    Examples:
-    \b
-    # Generate curated MetFaces images without truncation (Fig.10 left)
-    python generate.py --outdir=out --trunc=1 --seeds=85,265,297,849 \\
-        --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
-    \b
-    # Generate uncurated MetFaces images with truncation (Fig.12 upper left)
-    python generate.py --outdir=out --trunc=0.7 --seeds=600-605 \\
-        --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
-    \b
-    # Generate class conditional CIFAR-10 images (Fig.17 left, Car)
-    python generate.py --outdir=out --seeds=0-35 --class=1 \\
-        --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/cifar10.pkl
-    \b
-    # Render an image from projected W
-    python generate.py --outdir=out --projected_w=projected_w.npz \\
-        --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
-    """
+        """Generate images using pretrained network pickle.
+        Examples:
+        \b
+        # Generate curated MetFaces images without truncation (Fig.10 left)
+        python generate.py --outdir=out --trunc=1 --seeds=85,265,297,849 \\
+            --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
+        \b
+        # Generate uncurated MetFaces images with truncation (Fig.12 upper left)
+        python generate.py --outdir=out --trunc=0.7 --seeds=600-605 \\
+            --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
+        \b
+        # Generate class conditional CIFAR-10 images (Fig.17 left, Car)
+        python generate.py --outdir=out --seeds=0-35 --class=1 \\
+            --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/cifar10.pkl
+        \b
+        # Render an image from projected W
+        python generate.py --outdir=out --projected_w=projected_w.npz \\
+            --network=https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada-pytorch/pretrained/metfaces.pkl
+        """
 
-    print('Loading networks from "%s"...' % network_pkl)
-    device = torch.device('cuda')
-    with dnnlib.util.open_url(network_pkl) as f:
-        G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
+        print('Loading networks from "%s"...' % network_pkl)
+        device = torch.device('cuda')
+        with dnnlib.util.open_url(network_pkl) as f:
+            G = legacy.load_network_pkl(f)['G_ema'].to(device) # type: ignore
 
-    os.makedirs(outdir, exist_ok=True)
+        os.makedirs(outdir, exist_ok=True)
 
-    # Synthesize the result of a W projection.
-    if projected_w is not None:
-        if seeds is not None:
-            print ('warn: --seeds is ignored when using --projected-w')
-        print(f'Generating images from projected W "{projected_w}"')
-        ws = np.load(projected_w)['w']
-        ws = torch.tensor(ws, device=device) # pylint: disable=not-callable
-        assert ws.shape[1:] == (G.num_ws, G.w_dim)
-        for idx, w in enumerate(ws):
-            img = G.synthesis(w.unsqueeze(0), noise_mode=noise_mode)
-            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            print('here')
-            img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.png')
-        return
+        # Synthesize the result of a W projection.
+        if projected_w is not None:
+            if seeds is not None:
+                print ('warn: --seeds is ignored when using --projected-w')
+            print(f'Generating images from projected W "{projected_w}"')
+            ws = np.load(projected_w)['w']
+            ws = torch.tensor(ws, device=device) # pylint: disable=not-callable
+            assert ws.shape[1:] == (G.num_ws, G.w_dim)
+            for idx, w in enumerate(ws):
+                img = G.synthesis(w.unsqueeze(0), noise_mode=noise_mode)
+                img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+                print('here')
+                img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.png')
+            return
 
-    if seeds is None:
-        ctx.fail('--seeds option is required when not using --projected-w')
+        if seeds is None:
+            ctx.fail('--seeds option is required when not using --projected-w')
 
-    # Labels.
-    label = torch.zeros([1, G.c_dim], device=device)
-    if G.c_dim != 0:
-        if class_idx is None:
-            ctx.fail('Must specify class label with --class when using a conditional network')
-        label[:, class_idx] = 1
-    else:
-        if class_idx is not None:
-            print ('warn: --class=lbl ignored when running on an unconditional network')
+        # Labels.
+        label = torch.zeros([1, G.c_dim], device=device)
+        if G.c_dim != 0:
+            if class_idx is None:
+                ctx.fail('Must specify class label with --class when using a conditional network')
+            label[:, class_idx] = 1
+        else:
+            if class_idx is not None:
+                print ('warn: --class=lbl ignored when running on an unconditional network')
 
-    # Generate images.
-    print('Generating image for range %d ...' range)
-    z = torch.from_numpy(position).to(device)
-    img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-    img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-    PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom{position[0][0]}.png')
+        # Generate images.
+        print('Generating image for range %d ...' range)
+        z = torch.from_numpy(position).to(device)
+        img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
+        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom{position[0][0]}.png')
 
 
 #----------------------------------------------------------------------------
