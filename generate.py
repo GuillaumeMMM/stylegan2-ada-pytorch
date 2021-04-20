@@ -38,7 +38,6 @@ def num_range(s: str) -> List[int]:
 @click.command()
 @click.pass_context
 @click.option('--network', 'network_pkl', help='Network pickle filename', required=True)
-@click.option('--seeds', type=num_range, help='List of random seeds')
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
 @click.option('--class', 'class_idx', type=int, help='Class label (unconditional if not specified)')
 @click.option('--noise-mode', help='Noise mode', type=click.Choice(['const', 'random', 'none']), default='const', show_default=True)
@@ -47,7 +46,7 @@ def num_range(s: str) -> List[int]:
 def generate_images(
     ctx: click.Context,
     network_pkl: str,
-    seeds: Optional[List[int]],
+    range: int,
     truncation_psi: float,
     noise_mode: str,
     outdir: str,
@@ -55,8 +54,8 @@ def generate_images(
     projected_w: Optional[str]
 ):
 
-    for x in range(10):
-            position = np.array([np.random.uniform(low=-100, high=100, size=(512))])
+for x in range(10):
+        position = np.array([np.random.uniform(low=-range, high=range, size=(512))])
     """Generate images using pretrained network pickle.
     Examples:
     \b
@@ -113,12 +112,11 @@ def generate_images(
             print ('warn: --class=lbl ignored when running on an unconditional network')
 
     # Generate images.
-    for seed_idx, seed in enumerate(seeds):
-        print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
-        z = torch.from_numpy(position).to(device)
-        img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
-        img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom{position[0][0]}.png')
+    print('Generating image for range %d ...' range)
+    z = torch.from_numpy(position).to(device)
+    img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
+    img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+    PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_custom{position[0][0]}.png')
 
 
 #----------------------------------------------------------------------------
